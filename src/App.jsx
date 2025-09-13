@@ -1,5 +1,7 @@
 import { Switch, Route, useLocation } from 'react-router-dom';
 import Login from './components/Login';
+import Success from "./components/Success";
+
 
 import './App.css';
 import './components/Layout.css';
@@ -16,6 +18,9 @@ function App() {
           </Route>
           <Route exact path="/error">
             <ErrorPage />
+          </Route>
+          <Route exact path="/success">
+            <Success />
           </Route>
         </Switch>
       </div>
