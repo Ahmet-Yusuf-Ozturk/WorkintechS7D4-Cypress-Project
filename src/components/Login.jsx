@@ -24,6 +24,7 @@ const errorMessages = {
 
 export default function Login() {
   const [form, setForm] = useState(initialForm);
+  const [isValid, setIsValid] = useState(false);
   const history = useHistory();
 
   const handleChange = (event) => {
@@ -31,12 +32,28 @@ export default function Login() {
     value = type === 'checkbox' ? event.target.checked : value;
     setForm({ ...form, [name]: value });
   };
+
+  function validateEmail(email) {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return regex.test(email);
+  }
+  function validatePassword(password) {
+        const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;
+        return passwordRegex.test(password);
+  }
   
 
+  useEffect(() => {
+    setIsValid(
+      validateEmail(form.email) &&
+      validatePassword(form.password) &&
+      form.terms
+    );
+  }, [form]);
   const handleSubmit = (event) => {
     event.preventDefault();
 
-
+    if (isValid) {
       axios
         .get('https://6540a96145bedb25bfc247b4.mockapi.io/api/login')
         .then((res) => {
@@ -50,7 +67,7 @@ export default function Login() {
             history.push('/error');
           }
         });
-    
+    }
   };
 
   return (
@@ -58,6 +75,10 @@ export default function Login() {
       <FormGroup>
         <Label for="exampleEmail">Email</Label>
         <Input
+          data-cy="email-input"
+          invalid={
+            !validateEmail(form.email)
+          }
           id="exampleEmail"
           name="email"
           placeholder="Enter your email"
@@ -65,10 +86,15 @@ export default function Login() {
           onChange={handleChange}
           value={form.email}
         />
+        <FormFeedback data-cy="error-message-email">Please enter a valid email address!</FormFeedback>
       </FormGroup>
       <FormGroup>
         <Label for="examplePassword">Password</Label>
         <Input
+          data-cy="password-input"
+          invalid={validatePassword(form.password)===
+            false
+          }
           id="examplePassword"
           name="password"
           placeholder="Enter your password "
@@ -76,9 +102,12 @@ export default function Login() {
           onChange={handleChange}
           value={form.password}
         />
+        <FormFeedback data-cy="error-message-password">Not strong enough.</FormFeedback>
       </FormGroup>
       <FormGroup check>
         <Input
+          data-cy="terms-checkbox"
+          invalid={!form.terms}
           id="terms"
           name="terms"
           checked={form.terms}
@@ -90,7 +119,9 @@ export default function Login() {
         </Label>
       </FormGroup>
       <FormGroup className="text-center p-4">
-        <Button color="primary">
+        <Button
+        data-cy="submit-button"
+         disabled={isValid===false} color="primary">
           Sign In
         </Button>
       </FormGroup>
